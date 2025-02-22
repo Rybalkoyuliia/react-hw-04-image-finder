@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/react-hw-04-image-finder/static/css/main.dc491c24.css",
+    "main.js": "/react-hw-04-image-finder/static/js/main.7ad96e62.js",
+    "index.html": "/react-hw-04-image-finder/index.html",
+    "static/media/search.svg": "/react-hw-04-image-finder/static/media/search.f4340de82c792e793ee3adaf8d488ddf.svg",
+    "main.dc491c24.css.map": "/react-hw-04-image-finder/static/css/main.dc491c24.css.map",
+    "main.7ad96e62.js.map": "/react-hw-04-image-finder/static/js/main.7ad96e62.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.dc491c24.css",
+    "static/js/main.7ad96e62.js"
+  ]
+}
