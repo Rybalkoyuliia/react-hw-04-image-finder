@@ -1,0 +1,16 @@
+.first_container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 200px;
+}
+
+.first_phrase {
+  width: 60%;
+  font-size: 40px;
+  text-align: center;
+  span {
+    font-weight: bold;
+  }
+}

@@ -1,0 +1,14 @@
+.unsuccess_container {
+  display: flex;
+  justify-content: center;
+  margin-top: 200px;
+}
+
+.unsuccess_phrase {
+  width: 60%;
+  font-size: 40px;
+  text-align: center;
+  span {
+    font-weight: bold;
+  }
+}
