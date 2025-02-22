@@ -1,38 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import s from './Modal.module.css';
 
-export class Modal extends React.Component {
-  componentDidMount() {
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.body.style.overflowY = 'hidden';
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeyDown);
-    document.body.style.overflowY = 'auto';
-  }
-
-  handleKeyDown = e => {
-    if (e.key === 'Escape') {
-      this.props.closeModal();
-    }
-  };
-
-  handleBackdropClick = e => {
+export const Modal = ({ content, closeModal }) => {
+  const handleBackdropClick = e => {
     if (e.target === e.currentTarget) {
-      this.props.closeModal();
+      closeModal();
     }
   };
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflowY = 'hidden';
 
-  render() {
-    const { largeImageURL, tags } = this.props.content;
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflowY = 'auto';
+    };
+  }, [closeModal]);
 
-    return (
-      <div className={s.overlay} onClick={this.handleBackdropClick}>
-        <div className={s.modal}>
-          <img src={largeImageURL} alt={tags} />
-        </div>
+  const { largeImageURL, tags } = content;
+
+  return (
+    <div className={s.overlay} onClick={handleBackdropClick}>
+      <div className={s.modal}>
+        <img src={largeImageURL} alt={tags} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};

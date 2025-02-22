@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchImages } from 'servises/api';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -7,87 +7,87 @@ import { LoadMoreButton } from './LoadMoreButton/LoadMoreButton';
 import { Unsuccess } from './Unsuccess/Unsuccess';
 import { FirstLoad } from './FirstLoad/FirstLoad';
 import { Modal } from './Modal/Modal';
+import { toast } from 'react-toastify';
 
-export class App extends React.Component {
-  state = {
-    images: [],
-    totalImg: 0,
-    error: null,
-    isLoading: false,
-    page: 1,
-    q: '',
-    firstLoad: false,
-    isOpen: false,
-    content: null,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [totalImg, setTotalImg] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [q, setQ] = useState('');
+  const [firstLoad, setFirstLoad] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [content, setContent] = useState(null);
+  // state = {
+  //   images: [],
+  //   totalImg: 0,
+  //   error: null,
+  //   isLoading: false,
+  //   page: 1,
+  //   q: '',
+  //   firstLoad: false,
+  //   isOpen: false,
+  //   content: null,
+  // };
 
-  async componentDidMount() {
-    this.setState({
-      firstLoad: true,
-    });
-  }
-
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.page !== this.state.page || prevState.q !== this.state.q) {
+  useEffect(() => {
+    const getImages = async () => {
       try {
-        this.setState({ isLoading: true, firstLoad: false });
-        const { hits, totalHits } = await fetchImages({
-          q: this.state.q,
-          page: this.state.page,
-        });
-
-        this.setState(prev => ({
-          images: [...prev.images, ...hits],
-          totalImg: totalHits,
-        }));
+        setFirstLoad(true);
+        setIsLoading(true);
+        setError(null);
+        if (q) {
+          const { hits, totalHits } = await fetchImages({ q, page });
+          setImages(prev => [...prev, ...hits]);
+          setTotalImg(totalHits);
+          setFirstLoad(false);
+        } else {
+          setFirstLoad(true);
+        }
       } catch (error) {
-        this.setState({ error });
+        setError(error);
+        toast.error(`${error}`);
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
+    getImages();
+  }, [page, q]);
 
-  handleSetQuery = query => {
-    this.setState({ q: query, images: [], page: 1 });
+  const handleSetQuery = query => {
+    setQ(query);
+    setImages([]);
+    setPage(1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1);
   };
 
-  handleToggleModal = () => {
-    this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  const handleToggleModal = () => {
+    setIsOpen(prev => !prev);
   };
 
-  handleLargeImg = content => {
-    this.setState({ content, isOpen: true });
+  const handleLargeImg = content => {
+    setContent(content);
+    setIsOpen(true);
   };
 
-  render() {
-    const { images, isLoading, totalImg, isOpen, q, firstLoad, content } =
-      this.state;
+  return (
+    <>
+      <Searchbar handleSetQuery={handleSetQuery} />
+      {firstLoad && !isLoading && <FirstLoad />}
 
-    return (
-      <>
-        <Searchbar handleSetQuery={this.handleSetQuery} />
-        {firstLoad && <FirstLoad />}
+      {!images.length && q && !isLoading && !error && <Unsuccess word={q} />}
+      <ImageGallery images={images} openModal={handleLargeImg} />
 
-        {!images.length && q && !isLoading && <Unsuccess word={q} />}
+      {images.length && !isLoading && images.length < totalImg && (
+        <LoadMoreButton click={handleLoadMore} />
+      )}
 
-        <ImageGallery images={images} openModal={this.handleLargeImg} />
-
-        {images.length && !isLoading && images.length < totalImg && (
-          <LoadMoreButton click={this.handleLoadMore} />
-        )}
-
-        {isLoading && <Loader />}
-        {isOpen && (
-          <Modal content={content} closeModal={this.handleToggleModal} />
-        )}
-      </>
-    );
-  }
-}
+      {isLoading && <Loader />}
+      {isOpen && <Modal content={content} closeModal={handleToggleModal} />}
+    </>
+  );
+};

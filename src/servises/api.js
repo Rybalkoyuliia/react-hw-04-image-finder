@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 axios.defaults.baseURL = 'https://pixabay.com/';
 
@@ -17,6 +18,6 @@ export const fetchImages = async configParams => {
     });
     return data;
   } catch (error) {
-    alert(error);
+    toast.error(`${error.message}`);
   }
 };
