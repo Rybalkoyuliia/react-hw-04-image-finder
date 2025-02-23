@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { fetchImages } from 'servises/api';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -8,70 +8,60 @@ import { Unsuccess } from './Unsuccess/Unsuccess';
 import { FirstLoad } from './FirstLoad/FirstLoad';
 import { Modal } from './Modal/Modal';
 import { toast } from 'react-toastify';
+import { imageFinderReducer, initialState } from 'reducer/imageFinderReducer';
 
 export const App = () => {
-  const [images, setImages] = useState([]);
-  const [totalImg, setTotalImg] = useState([]);
-  const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [q, setQ] = useState('');
-  const [firstLoad, setFirstLoad] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState(null);
-  // state = {
-  //   images: [],
-  //   totalImg: 0,
-  //   error: null,
-  //   isLoading: false,
-  //   page: 1,
-  //   q: '',
-  //   firstLoad: false,
-  //   isOpen: false,
-  //   content: null,
-  // };
+  const [state, dispatch] = useReducer(imageFinderReducer, initialState);
+
+  const {
+    images,
+    totalImg,
+    error,
+    isLoading,
+    page,
+    q,
+    firstLoad,
+    isOpen,
+    content,
+  } = state;
 
   useEffect(() => {
     const getImages = async () => {
       try {
-        setFirstLoad(true);
-        setIsLoading(true);
-        setError(null);
+        dispatch({ type: 'firstLoad', payload: true });
+        dispatch({ type: 'loading', payload: true });
+        dispatch({ type: 'error', payload: null });
         if (q) {
           const { hits, totalHits } = await fetchImages({ q, page });
-          setImages(prev => [...prev, ...hits]);
-          setTotalImg(totalHits);
-          setFirstLoad(false);
+          dispatch({ type: 'fetchImg', payload: { hits, totalHits } });
+          dispatch({ type: 'firstLoad', payload: false });
         } else {
-          setFirstLoad(true);
+          dispatch({ type: 'firstLoad', payload: true });
         }
       } catch (error) {
-        setError(error);
+        dispatch({ type: 'error', payload: error });
         toast.error(`${error}`);
       } finally {
-        setIsLoading(false);
+        dispatch({ type: 'loading', payload: false });
       }
     };
     getImages();
   }, [page, q]);
 
   const handleSetQuery = query => {
-    setQ(query);
-    setImages([]);
-    setPage(1);
+    dispatch({ type: 'findImg', payload: query });
   };
 
   const handleLoadMore = () => {
-    setPage(prev => prev + 1);
+    dispatch({ type: 'changePage' });
   };
 
   const handleToggleModal = () => {
-    setIsOpen(prev => !prev);
+    dispatch({ type: 'toggleModal' });
   };
 
   const handleLargeImg = content => {
-    setContent(content);
-    setIsOpen(true);
+    dispatch({ type: 'largeImgOpen', payload: content });
   };
 
   return (
